@@ -1,0 +1,381 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname HW4) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;; Purpose: Design recipe practice, now with unions
+
+(require 2htdp/image)
+(require 2htdp/universe)
+
+;; Instructions
+;; 1. Do not create, modify or delete any line that begins with ";;!". These are
+;;    markers that we use to segment your file into parts to facilitate grading.
+;; 2. You must follow the design recipe for every problem. In particular,
+;;    every function you define must have at least three check-expects (and
+;;    more if needed).
+;; 3. You must follow the Style Guide:
+;;    https://pages.github.khoury.northeastern.edu/2500/2024F/style.html
+;; 4. You must submit working code. In DrRacket, ensure you get no errors
+;;    when you click Run. After you submit on Gradescope, you'll get instant
+;;    feedback on whether Gradescope can run your code, and your code must
+;;    run on Gradescope to receive credit from the autograder.
+
+;;! Problem 1
+
+;; Consider the following structure definitions:
+
+;;! Part A
+
+;; Complete three data designs for each structure called Blender, Microwave,
+;; and Kettle.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;; A Blender is a (make-blender String Number Boolean)
+(define-struct blender [brand wattage crushes-ice?])
+;; Represents a blender where:
+;; - brand is the brand of the blender
+;; - wattage is the wattage of the blender in watts
+;; - crushes-ice? is whether or not the blender crushes ice
+
+;; make-blender : String Number Boolean -> Blender
+;; blender? : Any -> Boolean
+;; blender-brand : Blender -> String
+;; blender-wattage : Blender -> Number
+;; blender-crushes-ice? : Blender -> Boolean
+
+(define BLENDER-1 (make-blender "Som's Brand" 500 #true))
+(define BLENDER-2 (make-blender "Neal's Brand" 3500 #false))
+(define BLENDER-3 (make-blender "Collin's Brand" 5000 #true))
+
+;; Blender -> ?
+(define (blender-temp blender)
+    (...(blender-brand blender)
+    ...(blender-wattage blender)
+    ...(blender-crushes-ice? blender)))
+
+;; A Microwave is a (make-microwave String Number)
+(define-struct microwave [brand wattage])
+;; Represents a microwave where:
+;; - brand is the brand of the microwave
+;; - wattage is the wattage of the microwave in watts
+
+;; make-microwave : String Number -> Microwave
+;; microwave? : Any -> Boolean
+;; microwave-brand : Microwave -> String
+;; microwave-wattage : Microwave -> Number
+
+(define MICROWAVE-1 (make-microwave "Som's Brand" 2000))
+(define MICROWAVE-2 (make-microwave "Neal's Brand" 2500))
+(define MICROWAVE-3 (make-microwave "Collin's Brand" 1000))
+
+;; Microwave -> ?
+(define (microwave-temp microwave)
+    (...(microwave-brand microwave)
+    ...(microwave-wattage microwave)))
+
+;; A Kettle is a (make-kettle String Number Number)
+(define-struct kettle [brand wattage capacity])
+;; Represents a kettle where:
+;; - brand is the brand of the kettle
+;; - wattage is the wattage of the kettle in watts
+;; - capacity is the volume of liquid that the kettle can hold in mL
+
+;; make-kettle : String Number Number -> Kettle
+;; kettle? : Any -> Boolean
+;; kettle-brand : Kettle -> String
+;; kettle-wattage : Kettle -> Number
+;; kettle-capacity : Kettle -> Number
+
+(define KETTLE-1 (make-kettle "Som's Brand" 2500 2000))
+(define KETTLE-2 (make-kettle "Neal's Brand" 3500 5000))
+(define KETTLE-3 (make-kettle "Collin's Brand" 500 500))
+
+;; Kettle -> ?
+(define (kettle-temp kettle)
+    (...(kettle-brand kettle)
+    ...(kettle-wattage kettle)
+    ...(kettle-capacity kettle)))
+
+;;! Part B
+
+;; Complete a data design called Appliance, which can represent any appliance
+;; listed above.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;; An Appliance is one of:
+;; - Blender
+;; - Microwave
+;; - Kettle
+;; Interpretation: Represents an appliance that can be used in the kitchen
+
+;; Appliance -> ?
+(define (appliance-temp appliance)
+    (... (cond [(blender? appliance) ...(blender-temp appliance)]
+             [(microwave? appliance) ...(microwave-temp appliance)]
+             [(kettle? appliance) ...(kettle-temp appliance)])))
+
+;;! Part C
+
+;; Design a function called `power-up-appliance` that takes an Appliance and produces another Appliance
+;; that is identical, except that if it is a Microwave, its wattage is increased by 50 watts.
+
+;; Note: for full credit, a helper is required in this problem.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;; increase-microwave-wattage : Microwave -> Microwave
+;; returns an identical microwave with a wattage increased by 50 watts
+(define (increase-microwave-wattage microwave)
+  (make-microwave (microwave-brand microwave) (+ 50 (microwave-wattage microwave))))
+
+;; Test Cases
+(check-expect (increase-microwave-wattage MICROWAVE-1)
+              (make-microwave (microwave-brand MICROWAVE-1)
+                              (+ 50 (microwave-wattage MICROWAVE-1))))
+(check-expect (increase-microwave-wattage MICROWAVE-2)
+              (make-microwave (microwave-brand MICROWAVE-2)
+                              (+ 50 (microwave-wattage MICROWAVE-2))))
+(check-expect (increase-microwave-wattage MICROWAVE-3)
+              (make-microwave (microwave-brand MICROWAVE-3)
+                              (+ 50 (microwave-wattage MICROWAVE-3))))
+
+;; power-up-appliance : Microwave -> Microwave
+;; returns an identical appliance, except if it is a microwave, its wattage increases by 50 watts
+(define (power-up-appliance microwave)
+    (if (microwave? microwave)
+        (increase-microwave-wattage microwave)
+        microwave))
+
+;; Test Cases
+(check-expect (power-up-appliance BLENDER-1) BLENDER-1)
+(check-expect (power-up-appliance MICROWAVE-1)
+              (make-microwave (microwave-brand MICROWAVE-1)
+                              (+ 50 (microwave-wattage MICROWAVE-1))))
+(check-expect (power-up-appliance KETTLE-1) KETTLE-1)
+
+;;! Part D
+
+;; Design a function `is-high-power?` that takes an Appliance and returns #true
+;; if it is "high power". A high-power blender is at least 1000 watts, whereas
+;; any other appliance must be at least 2000 watts.
+;;
+;; Note: you _need_ to write helper functions in order to solve this problem for
+;; full credit.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;; is-blender-high-power? : Blender -> Boolean
+;; returns true if blender wattage is greater than 1000, else return false
+(define (is-blender-high-power? blender)
+  (>= (blender-wattage blender) 1000))
+
+;; Test Cases
+(check-expect (is-blender-high-power? BLENDER-1) #false)
+(check-expect (is-blender-high-power? BLENDER-2) #true)
+(check-expect (is-blender-high-power? BLENDER-3) #true)
+
+;; is-microwave-high-power? : Microwave -> Boolean
+;; returns true if microwave wattage is greater than 2000, else return false
+(define (is-microwave-high-power? microwave)
+  (>= (microwave-wattage microwave) 2000))
+
+;; Test Cases
+(check-expect (is-microwave-high-power? MICROWAVE-1) #true)
+(check-expect (is-microwave-high-power? MICROWAVE-2) #true)
+(check-expect (is-microwave-high-power? MICROWAVE-3) #false)
+
+;; is-kettle-high-power? : Kettle -> Boolean
+;; returns true if kettle wattage is greater than 2000, else return false
+(define (is-kettle-high-power? blender)
+  (>= (kettle-wattage blender) 2000))
+
+;; Test Cases
+(check-expect (is-kettle-high-power? KETTLE-1) #true)
+(check-expect (is-kettle-high-power? KETTLE-2) #true)
+(check-expect (is-kettle-high-power? KETTLE-3) #false)
+
+;; is-high-power? : Appliance -> Boolean
+;; returns true if a given appliance is "high power"
+(define (is-high-power? appliance)
+    (cond [(blender? appliance) (is-blender-high-power? appliance)]
+        [(microwave? appliance) (is-microwave-high-power? appliance)]
+        [(kettle? appliance) (is-kettle-high-power? appliance)]
+        [else #false]))
+
+;; Test Cases
+(check-expect (is-high-power? BLENDER-1) #false)
+(check-expect (is-high-power? MICROWAVE-1) #true)
+(check-expect (is-high-power? KETTLE-1) #true)
+
+;;! Problem 2
+
+;;! Part A
+
+;; Last week, you designed data to represent a neighborhood in Boston. But this
+;; definition didn't include any interesting information about the neighborhoods
+;; besides its name. We want to design a data definition that associates some
+;; additional information, in this case, the number of commuters that take
+;; public transit:
+;;
+;; https://bpda-research.shinyapps.io/neighborhood-change/
+;; (navigate to the Neighborhoods tab and select Commute Mode from the
+;; dropdown).
+;;
+
+;; Design a data definition that combines a Neighborhood with a number of
+;; commuters who take public transit. Please use the same five neighborhoods as
+;; you used in HW2. Make sure to copy (and fix, if necessary) your Neighborhood
+;; data design from HW2.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;; A Neighborhood is one of:
+;; - "East Boston"
+;; - "West Roxbury"
+;; - "Hyde Park"
+;; - "Brighton"
+;; - "Dorchester"
+;; Interpretation: A neighborhood is one of 23 named neighborhoods in Boston
+;; Examples: "East Boston", "West Roxbury", "Hyde Park"
+
+(define EAST-BOSTON "East Boston")
+(define WEST-ROXBURY "West Roxbury")
+(define HYDE-PARK "Hyde Park")
+(define BRIGHTON "Brighton")
+(define DORCHESTER "Dorchester")
+
+;; neighborhood-template : Neighborhood -> ?
+(define (neighborhood-template n)
+  (cond
+    [(string=? n EAST-BOSTON) ...]
+    [(string=? n WEST-ROXBURY) ...]
+    [(string=? n HYDE-PARK) ...]
+    [(string=? n BRIGHTON) ...]
+    [(string=? n DORCHESTER) ...]))
+
+;; A NeighborhoodCommuters is a (make-neighborhood-commuters Neighborhood Number)
+(define-struct neighborhood-commuters [name commuters])
+;; Represents a NeighborhoodCommuters where:
+;; - name is the Neighborhood
+;; - commuters is the number of commuters who use public transit in the neighborhood
+
+;; make-neighborhood-commuters : Neighborhood Number -> NeighborhoodCommuters
+;; neighborhood-commuters? : Any -> Boolean
+;; neighborhood-commuters-name : NeighborhoodCommuters -> Neighborhood
+;; neighborhood-commuters-commuters : NeighborhoodCommuters -> Number
+
+(define EAST-BOSTON-NEIGHBORHOOD-COMMUTERS (make-neighborhood-commuters EAST-BOSTON 14110))
+(define WEST-ROXBURY-NEIGHBORHOOD-COMMUTERS (make-neighborhood-commuters WEST-ROXBURY 2919))
+(define HYDE-PARK-NEIGHBORHOOD-COMMUTERS (make-neighborhood-commuters HYDE-PARK 4548))
+(define BRIGHTON-NEIGHBORHOOD-COMMUTERS (make-neighborhood-commuters BRIGHTON 11007))
+(define DORCHESTER-NEIGHBORHOOD-COMMUTERS (make-neighborhood-commuters DORCHESTER 22294))
+
+;; NeighborhoodCommuters -> ?
+(define (neighborhood-commuters-temp neighborhood-commuters)
+    (...(neighborhood-template (neighborhood-commuters-name neighborhood-commuters))
+    ...(neighborhood-commuters-commuters neighborhood-commuters)))
+
+;;! Part B
+
+;; INTERPRETIVE QUESTION: The way we store information can make it more or less
+;; useful for future purposes. While part A asked you to record a "number" of
+;; commuters, there are two different common numeric representations:
+;; percentages and raw counts. Imagine the city is trying to decide where to
+;; allocate a grant to support public transit. They want to pilot it in a
+;; place where they know lots of people use public transit, based
+;; on the 2020 data.
+
+;; One researcher says we should allocate the grant funding to East Boston,
+;; since 55% of its residents use public transit, the highest in the city.
+;; Another says the grant should be allocated to public transit in Dorcester,
+;; even though only 37% of its residents use public transit.
+
+;; Based on the data you have, why might the second researcher be right? Please
+;; explain in 2-3 sentences, providing reasons for your answer. Include a
+;; description of what kind of data you would need to store in your data
+;; definition to allow researchers to make this decision. (NOTE: you do not need
+;; to update you data definition, just describe changes).
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+#|
+
+Although East Boston has a higher PERCENTAGE of public transit commuters than Dorchester, it has a 
+lower RAW COUNT of public transit commuters than Dorchester. In order to allow the researchers to make
+this decision, we should add a piece of information to each neighborhood; the percentage of public
+transit commuters. With this additional piece of information, researchers will have all the resources
+required to compare PERCENTAGE v.s RAW COUNTS and decide which is better to use when deciding where
+the grant should be allocated.
+
+|#
+
+;;! Part C
+
+;; Now that we have more interesting data, let's update our draw function! This
+;; time, in addition to the neighborhood input (which now includes commuter
+;; counts), we also want your draw function to take a numeric scale between 0
+;; and 1 (written Decimal(0,1]) and adjust the size of the drawn neighborhood
+;; according to it: at scale 1, the neighborhood should be large, but fit in a
+;; reasonably sized window; smaller scales should result in smaller images.
+;;
+;; Design a function called `draw-neighborhood-commuters` that takes two inputs:
+;; 1. your new data definition and 2. a numeric scale between 0 (exclusive) & 1
+;; (inclusive). It should produces an image of the neighborhood. The function
+;; should vary the color of the neighborhood based on the number of commuters,
+;; and the size according to the scale. How you choose to color the neighborhood
+;; based on the percentage is up to you, but include some explanation in your
+;; purpose statement.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;; get-neighborhood-color : Number -> String
+;; Returns the color of the neighborhood given the number of commuters, the less the number of
+;; the commuters, the lighter the shade of brown it is
+(define (get-neighborhood-color commuters)
+  (cond
+    [(<= commuters 5000) "dark pink"]
+    [(and (> commuters 5000) (<= commuters 10000)) "light brown"]
+    [(and (> commuters 10000) (<= commuters 15000)) "medium brown"]
+    [(and (> commuters 15000) (<= commuters 20000)) "dark brown"]
+    [(> commuters 20000) "brown"]))
+
+;; Test Cases
+(check-expect (get-neighborhood-color 7500) "light brown")
+(check-expect (get-neighborhood-color 17500) "dark brown")
+(check-expect (get-neighborhood-color 25000) "brown")
+
+;; draw-neighborhood-commuters : Combination Decimal[0,1] -> Image
+;; Interpretation: Draws the neighborhood on a map given the combination and scale, the color of the
+;; neighborhood is dependent on the number of commuters, as explained in the get-neighborhood-color
+;; helper function
+(define (draw-neighborhood-commuters combination scale)
+  (overlay
+   (square
+    (* scale (* 15 (/ (combination-commuters combination) 1000)))
+    "solid"
+    (get-neighborhood-color (combination-commuters combination)))
+   (square (* scale 300) "outline" "black")))
+
+;; Test Cases
+(check-expect (draw-neighborhood-commuters HYDE-PARK-COMBINATION 0.5)
+              (overlay
+               (square
+                (* 0.5 (* 15 (/ (combination-commuters HYDE-PARK-COMBINATION) 1000)))
+                "solid"
+                (get-neighborhood-color (combination-commuters HYDE-PARK-COMBINATION)))
+               (square (* 0.5 300) "outline" "black")))
+(check-expect (draw-neighborhood-commuters EAST-BOSTON-COMBINATION 1)
+              (overlay
+               (square
+                (* 1 (* 15 (/ (combination-commuters EAST-BOSTON-COMBINATION) 1000)))
+                "solid"
+                (get-neighborhood-color (combination-commuters EAST-BOSTON-COMBINATION)))
+               (square (* 1 300) "outline" "black")))
+(check-expect (draw-neighborhood-commuters BRIGHTON-COMBINATION 0.7)
+              (overlay
+               (square
+                (* 0.7 (* 15 (/ (combination-commuters BRIGHTON-COMBINATION) 1000)))
+                "solid"
+                (get-neighborhood-color (combination-commuters BRIGHTON-COMBINATION)))
+               (square (* 0.7 300) "outline" "black")))

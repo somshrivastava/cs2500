@@ -1,0 +1,206 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname HW11) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;; Usual Instructions:
+;; 1. Do not create, modify or delete any line that begins with ";;!". These are
+;;    markers that we use to segment your file into parts to facilitate grading.
+;; 2. You must follow the _design recipe_ for every problem. In particular,
+;;    every function you define must have at least three check-expects (and
+;;    more if needed).
+;; 3. You must follow the Style Guide:
+;;    https://pages.github.khoury.northeastern.edu/2500/2024F/style.html
+;; 4. You must submit working code. In DrRacket, ensure you get no errors
+;;    when you click Run. After you submit on Gradescope, you'll get instant
+;;    feedback on whether or not Gradescope can run your code, and your code must
+;;    run on Gradescope to receive credit from the autograder.
+;; 5. On some problems, you can get automated feedback on your in-progress work
+;;    from FeedBot, a system developed by the course staff. When you submit your
+;;    assignment, you will see a link to the FeedBot report along with the autograder
+;;    feedback. Only a certain number of submissions will get this, and submissions
+;;    close together will not receive the feedback.
+
+;;! HW11
+
+;; In the era of the Internet of Things (IoT), smart home systems play an important role
+;; in enhancing convenience, security, and energy efficiency. Efficient data processing
+;; and algorithms are essential for optimizing device performance, as they ensure user
+;; satisfaction and maintain system security. As a software developer working
+;; on smart home systems, you are tasked with implementing algorithms that handle large
+;; datasets, perform real-time data analysis, and maintain system performance.
+
+;; Consider the following data definition for a SmartHomeDevice:
+
+(define-struct device [name energy-consumption])
+;; A SmartHomeDevice is a (make-device String Number)
+;; Representing a smart home device
+;; - name is the name of the device
+;; - energy-consumption is the energy consumption of the device in watts
+
+(define D1 (make-device "Thermostat" 150))
+(define D2 (make-device "Light Bulb" 60))
+(define D3 (make-device "Security Camera" 100))
+(define D4 (make-device "Security Camera" 30))
+(define D5 (make-device "Security Camera" 0))
+
+(define (device-temp d)
+  (... (device-name d) ... (device-energy-consumption d) ...))
+
+;;! Problem 1
+
+;; Implement a function `devices-possible` that takes a list of devices and a
+;; total power budget (in watts) and returns a prefix of the list whose total
+;; power usage is as close to the power budget as possible without exceeding it.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;; devices-possible : [List-of Device] Number -> [List-of Device]
+;; takes a list of devices and a total power budget (in watts) and returns a prefix of the list
+;; whose total power usage is as close to the power budget as possible without exceeding it
+(define (devices-possible devices budget)
+  (local [
+          (define (helper remaining prefix sum)
+            (cond
+              [(empty? remaining) prefix]
+              [else
+               (if (<= (+ sum (device-energy-consumption (first remaining))) budget)
+                   (helper (rest remaining)
+                         (append prefix (list (first remaining)))
+                         (+ sum (device-energy-consumption (first remaining))))
+                   prefix)]))]
+    (helper devices '() 0)))
+
+
+(check-expect (devices-possible (list D1 D2 D3) 200) (list D1)) 
+(check-expect (devices-possible (list D1 D2 D3) 50) '())
+(check-expect (devices-possible (list D1 D2 D3 D4) 90) '())
+
+;;! Problem 2
+
+;; Design a function total-energy, that returns the total energy consumed by a
+;; list of devices. If 3 of the devices have an energy consumption of 0
+;; (indicating the devices are inactive), the entire function should immediately
+;; return the total energy consumption up to the point where the 3rd inactive device was encountered.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;; total-energy : [List-of Device] -> Number
+;; that returns the total energy consumed by a list of devices, if 3 of the devices have an energy
+;; consumption of 0 (indicating the devices are inactive), the entire function should immediately
+;; return the total energy consumption up to the point where the 3rd inactive device was encountered
+(define (total-energy devices)
+  (local [
+          (define (helper lst inactive total)
+            (cond [(empty? lst) total]
+                  [(>= inactive 3) total]
+                  [(equal? (device-energy-consumption (first lst)) 0) (helper (rest lst) (add1 inactive) total)]
+                  [else (helper (rest lst) inactive (+ (device-energy-consumption (first lst)) total))]))
+          ]
+    (helper devices 0 0)))
+
+
+
+(check-expect (total-energy (list D1 D2 D3)) 310) 
+(check-expect (total-energy (list D1 D2 D5)) 210) 
+(check-expect (total-energy (list D5 D1 D2 D5 D3 D5 D4)) 310)
+
+
+;; 
+
+;;! Problem 3
+
+;;! Part A
+
+;; Design the data definition Circuit that can represent either outlets, wires
+;; (that lead to another Circuit, indicated with an arrow in diagram), junctions
+;; (that have three Circuits coming out of them), or a dead end.
+
+;; An example that you would want to be able to represent is (wire abbreviated w
+;; in places):
+
+;; --- wire ---> |junction|
+;;                /  |  \
+;;               w   w   w
+;;              /    |    \
+;;             \/    |    \/
+;;          outlet   |   outlet
+;;                  \|/
+;;                deadend
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+
+;;! Part B
+
+;; Define an interesting example of your data definition, as the constant `CIRCUIT-EX`.
+;; NOTE: The autograder for Problem 4 will fail if you submit without defining `CIRCUIT-EX`.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+
+;;! Problem 4
+
+;; Design a function, length-to-wires, that given a Circuit, returns a list of
+;; numbers that represent the length, in number of wires, to each of the outlets
+;; in the Circuit.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+
+;;! Problem 5
+;; INTERPRETIVE QUESTION
+;;
+;; While smart home devices are often sold because they can either increase
+;; convenience or sometimes decrease total energy use by "intelligently" turning
+;; off, there are several new challenges introduced by their use:
+;;
+;; 1. Privacy / surveillance concerns. Many devices transmit their data to
+;; centralized data centers, and if those are compromised, anything from the
+;; voice recordings from smart speakers to videos from baby monitors could be
+;; made available. This has been the subject of federal law in the United States,
+;; with Internet of Things Cybersecurity Improvement Act of 2020 setting minimum
+;; security standards for such devices if used by the federal government.
+;;
+;; 2. Increase of "electronic waste" or e-waste: many devices only work when in
+;; contact with software running on remote servers, and if the company changes
+;; the software or goes out of business, the device could stop working or need
+;; to be replaced, potentially much more quickly than a non-smart version would
+;; have. Many have advocated, and in some places passed, so called "Right to
+;; repair" laws that ensure consumers have access to the ability to fix or keep
+;; running devices: one of the first in the US was actually for cars, where a
+;; law in Massachussetts guaranteed owners the same access to repair information
+;; as car dealers.
+;;
+;; FIRST TASK: Please identify which privacy concerns you think are most
+;; important for smart home devices. Write no more than 2-3 sentences.
+;;
+;; SECOND TASK: Please identify which "right to repair" principles are most
+;; important for smart home devices. Write no more than 2-3 sentences.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+
+;;! Problem 6
+;;
+;; Design a function `remove-devices` that, given a list of devices, removes
+;; some of them according to the following strategy, and returns the remaining
+;; ones:
+;;
+;; - The first device should be kept.
+;; - If the first one has energy-consumption n, then the next m devices should be removed, until
+;;   the total energy of the m devices adds to n or greater (or the end of the list is reached).
+;; - This should then repeat with the next device being treated like the first one.
+;;
+;;
+;; One test is provided as an example:
+#| (check-expect (remove-devices (list (make-device "A" 100)
+                                    (make-device "B" 60)
+                                    (make-device "C" 50)
+                                    (make-device "D" 30)
+                                    (make-device "E" 100)
+                                    (make-device "F" 10)))
+              (list (make-device "A" 100)
+                    (make-device "D" 30)
+                    (make-device "F" 10)))
+|#
+;;!! IMPORTANT: Write your response BELOW this line:
+

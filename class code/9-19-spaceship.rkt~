@@ -1,0 +1,12 @@
+;; A Spaceship is a (make-ship Position String Number)
+(define-struct ship (location color time-elapse))
+;; Interpretation: represents a spaceship in the game
+;; location is the position of the center of the ship on the board
+;; time-elapsed is measured in seconds
+
+(define (spaceship-temp aship)
+    ... (posn-temp (ship-location aship))
+    ... (ship-color aship)
+    ... (ship-time-elapsed aship))
+
+(define ship1 (make-ship (make-posn 30 40) "red" 30))

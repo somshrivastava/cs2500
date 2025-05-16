@@ -1,0 +1,56 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname 9-23-tf-test-start) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;; A TFQuestion is a (make-tfq String Boolean)
+(define-struct tfq [prompt answer])
+;; represents a question in a true/false test
+
+(define TFQ-1 (make-tfq "fundies 1 is the best course" #true)) 
+(define TFQ-2 (make-tfq "The weather is cold today" #false)) 
+(define TFQ-3 (make-tfq "Well-designed code comes from 
+                                following the design  recipe" #true)) 
+(define TFQ-4 (make-tfq "The shape of the data determines 
+                                  the shape of the function" #true)) 
+(define TFQ-5 (make-tfq "I can produce functioning, well-designed code
+                     faster by not following the design recipe" #false))
+
+;; tfq-temp : TFQuestion -> ?
+#;(define (tfq-temp q)
+  ... (tfq-prompt q) ...
+  ... (tfq-answer q) ...)
+
+
+;; A TFTest is a (make-tft TFQuestion TFQuestion
+;;                         TFQuestion TFQuestion TFQuestion)
+(define-struct tft [q1 q2 q3 q4 q5])
+;; represents a true/false test with 5 questions
+
+(define TFT (make-tft TFQ-1 TFQ-2 TFQ-5 TFQ-4 TFQ-3))
+
+
+;; tft-temp : TFTest -> ?
+#;(define (tft-temp test)
+  ...(tfq-temp (tft-q1 test))...
+  ...(tfq-temp (tft-q2 test))...
+  ...(tfq-temp (tft-q3 test))...
+  ...(tfq-temp (tft-q4 test))...
+  ...(tfq-temp (tft-q5 test))...)
+
+
+;; passed? : TFTest Boolean -> Boolean
+;; can we pass the test by plugging in
+;; the given Boolean to each question?
+
+
+
+
+
+
+
+
+
+
+
+
+
+  

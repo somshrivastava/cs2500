@@ -1,0 +1,319 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname HW2) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+
+#|
+
+Do NOT include inline images (i.e., images copied into the definitions window), or comment boxes, etc.
+It is fine to create images programatically, i.e., (define MY-IMAGE (square 10 "solid" "red")),
+just don’t copy images from the interactions window into the definitions window,
+or use the Insert menu to insert an image. While programs with these features run fine in DrRacket,
+they cause the file to not work via Gradescope.
+
+|#
+
+;; Purpose: An introduction to data design (enumerations) and the design recipe.
+
+(require 2htdp/image)
+
+;;! Instructions:
+;;! 1. Read the contents of this file, and fill in [TODO] items that appear
+;;!    below.
+;;! 2. Do not create, modify or delete any line that begins with ";;!", such
+;;!    as these lines. These are markers that we use to segment your file into
+;;!    parts to facilitate grading.
+;;! 3. You must follow the _design recipe_ for every problem. In particular,
+;;!    every function you define must have at least three check-expects (and
+;;!    more if needed).
+
+;;! Problem 1
+
+;; The weather is cooling down in Boston, but over the summer, you noticed a lot
+;; of kids selling lemonade at little stands. You noticed two that were next to
+;; each other that had different pricing and different materials. You were
+;; curious which strategy would work better, so in this problem you will model
+;; both stands.
+
+;;! Part A
+
+;; The first stand was getting 16 fluid ounce bottles of lemonade from a shop
+;; right around the corner, for $2/each, and was selling 4 fluid ounce cups for
+;; $1/each. For simplicity, we'll ignore the cost of the cups, refridgeration,
+;; etc, and you can assume the corner shop never runs out of 16 fluid ounce bottles.
+;;
+;; Define a function "lemonade-stand-1" that takes a number of cups sold as
+;; input and returns the total profit. Be sure to take into account that the 16
+;; fluid ounce bottles cannot be purchased in part, so there may be extra left
+;; over! Hint: the functions `remainder` or `modulo` may be useful.
+
+;; [TODO] Function definition
+
+;; lemonade-stand-1 : Integer -> Rational
+;; calculates the total profit given the number of cups sold
+(define (lemonade-stand-1 cups)
+  (-  (* 1 cups) (* 2 (ceiling (/ (* 4 cups) 16)))))
+
+;; Test Cases
+(check-expect (lemonade-stand-1 2) 0)
+(check-expect (lemonade-stand-1 4) 2)
+(check-expect (lemonade-stand-1 20) 10)
+
+;;! Part B
+
+;; The second stand decided to buy the lemonade in bulk, getting a gigantic 5
+;; gallon (640 fluid ounce) container for $20. To try to undercut the other
+;; stand, they decided to sell their 4 fluid ounce cups for $0.75 each. But,
+;; since they bought their lemonade from a store that is far from home, when
+;; they run out, they will stop being able to sell lemonade.
+;;
+;; Define a function "lemonade-stand-2" that takes a number of cups (attempted
+;; to be) sold as input and returns the total profit. Note that this input may
+;; be any positive integer, so if it exceeds their capacity, the function should
+;; simply return their profit before they closed the stand. Note that if they
+;; sell the entirety of their lemonade, there is no penalty for being unable to
+;; sell additional cups. As before, we aren't considering cost of cups,
+;; refridgeration, etc.
+
+
+;; [TODO] Function definition
+
+;; lemonade-stand-2 : Integer -> Rational
+;; calculates the total profit given the number of cups sold
+(define (lemonade-stand-2 cups)
+  (if (>= cups (/ 640 4))
+      (- (* 0.75 (/ 640 4)) 20)
+      (- (* 0.75 cups) 20)))
+
+;; Test Cases
+(check-expect (lemonade-stand-2 10) -12.5)
+(check-expect (lemonade-stand-2 150) 92.5)
+(check-expect (lemonade-stand-2 200) 100)
+
+;;! Part C
+
+;; Now, you'd like to define a function `which-stand-better` that, given a
+;; number of cups sold, returns the number 1 if lemonade stand 1 would make more
+;; money at that number of cups, or 2 if lemonade stand 2 would make more money
+;; with that number of cups sold. If they are tied, return 0.
+
+;; [TODO] Function definition
+
+;; which-stand-better : Integer -> Integer
+;; determines whether lemonade stand 1 or 2 will have more profit given a number of cups
+(define (which-stand-better cups)
+  (if (equal? (lemonade-stand-1 cups) (lemonade-stand-2 cups))
+      0
+      (if (> (lemonade-stand-1 cups) (lemonade-stand-2 cups)) 1 2)))
+
+;; Test Cases
+(check-expect (which-stand-better 50) 1)
+(check-expect (which-stand-better 100) 2)
+(check-expect (which-stand-better 250) 1)
+
+;;! Part D
+
+;; Now use `which-stand-better` (and your other two functions) to investigate
+;; the two strategies. Describe, in words, how the two compare. Is one strictly
+;; better than the other? Does it depend on something?
+
+;; [TODO] Prose explanation
+
+#|
+
+One method is not strictly better than the other. When selling less than 77 cups or more than 202
+cups, Lemonade Stand 1 is better. But when selling between (inclusive) 77 and 202 cups,
+Lemonade Stand 2 is better.
+
+|#
+
+;;! Problem 2
+
+;;! Part A
+
+;; Boston has 23 named neighborhoods, as described on this web page:
+;; https://en.wikipedia.org/wiki/Neighborhoods_in_Boston
+;; Please choose 5 of them and design a data definition called Neighborhood
+;; that can represent any of the 5 neighborhoods that you have chosen.
+;; Note: name your template neighborhood-template.
+
+;; [TODO]
+
+;; A Neighborhood is one of:
+;; - "East Boston"
+;; - "West Roxbury"
+;; - "Hyde Park"
+;; - "Brighton"
+;; - "Dorchester"
+;; Interpretation: A neighborhood is one of 23 named neighborhoods in Boston
+;; Examples: "Allston", "Back Bay", "Beacon Hill"
+
+(define EAST-BOSTON "East Boston")
+(define WEST-ROXBURY "West Roxbury")
+(define HYDE-PARK "Hyde Park")
+(define BRIGHTON "Brighton")
+(define DORCHESTER "Dorchester")
+
+;; neighborhood-template : Neighborhood -> ?
+(define (neighborhood-template n)
+  (cond
+    [(string=? n EAST-BOSTON) ...]
+    [(string=? n WEST-ROXBURY) ...]
+    [(string=? n HYDE-PARK) ...]
+    [(string=? n BRIGHTON) ...]
+    [(string=? n DORCHESTER) ...]))
+
+;;! Part B
+
+;; One way to classify neighborhoods is using statistical information. The city
+;; collects information about residents in each neighborhood and publishes it
+;; at https://data.boston.gov/dataset/neighborhood-demographics/resource/7154cc09-55c4-4acd-99a5-3a233d11e699
+;; We want to focus on the 2000 data set. Note that the neighborhood list has slightly
+;; changed since then, so if any of your five chosen neighborhoods don't appear in this list,
+;; or appear under different names, please update your data definition to include only
+;; neighborhoods from this list.
+
+;; Design a predicate, `family-friendly?`, that returns #t if
+;; the percentage of people under 9 years old is above 10% -- as those are the
+;; neighborhoods with lots of families with small kids.
+
+;; [TODO]
+
+;; family-friendly? : Neighborhood -> Boolean
+;; returns whether a neighborhood is family friendly given the neighborhood
+(define (family-friendly? neighborhood)
+  (> (cond
+    [(string=? neighborhood EAST-BOSTON) 14]
+    [(string=? neighborhood WEST-ROXBURY) 12]
+    [(string=? neighborhood HYDE-PARK) 14]
+    [(string=? neighborhood BRIGHTON) 6]
+    [(string=? neighborhood DORCHESTER) 16]) 10))
+
+;; Test Cases
+(check-expect (family-friendly? EAST-BOSTON) #true)
+(check-expect (family-friendly? WEST-ROXBURY) #true)
+(check-expect (family-friendly? HYDE-PARK) #true)
+(check-expect (family-friendly? BRIGHTON) #false)
+(check-expect (family-friendly? DORCHESTER) #true)
+
+
+;;! Part C
+;;
+;; INTERPRETIVE QUESTION:
+;;
+;; While this predicate captures neighborhoods that have _many_ children, mere
+;; numbers do not necessarily convey how "friendly" a neighborhood is to
+;; families. Write 2-3 sentences about factors that, as the City, you might want
+;; to include if you were to publish a list of "family friendly neighborhoods"
+;; beyond just the percentage used above.
+
+;; [TODO]
+
+;; Additional factors that affect whether a neighborhood is family-friendly are safety, walkability,
+;; and education. A family-friendly neighorbood should have a low crime rate to be safe. A
+;; family-friendly neighborhood should have sidewalks everywhere for walkability. A family-friendly
+;; neighborhood should have a high school rating for good education.
+
+;;! Part D
+
+;; How should you draw a Neighborhood? Design a function `draw-neighborhood` that takes
+;; a Neighborhood and returns an Image representation of it. As is often the case, we need
+;; to understand how the result may be used before we can figure out how to design this.
+;; Does it need to be geographically accurate? If it will be used for mapping, and we were
+;; planning on adding streets, etc, then clearly yes! But if we were planning, instead, to use
+;; the result for data visualization, simple abstractions might be okay. Another question
+;; you should ask: should the sizes be correct relative to one another? Some neighborhoods are
+;; much bigger than others: does the image need to convey this scale accurately? Perhaps the
+;; size of a neighborhood will be something that the user should be able to control, as
+;; certain visualizations may display neighborhoods scaled to convey information.
+;;
+;; We would like you to make some decisions, reflected in your purpose
+;; statements. Define a purpose and use case for 'draw-neighborhood'.
+;; Each decision you make should be justified with a reason why that relates
+;; to the purpose of the function. You are welcome to use simplified drawings, but justify why.
+
+;; [TODO]
+
+(define EAST-BOSTON-MAP (place-image (rectangle 50 50 "solid" "green")
+                                     175 25
+                                     (rectangle 200 250 "solid" "transparent")))
+(define WEST-ROXBURY-MAP (place-image (rectangle 55 80 "solid" "blue")
+                                      20 180
+                                      (rectangle 200 250 "solid" "transparent")))
+(define HYDE-PARK-MAP (place-image (rectangle 45 70 "solid" "red")
+                                   70 225
+                                   (rectangle 200 250 "solid" "transparent")))
+(define BRIGHTON-MAP (place-image (rectangle 40 40 "solid" "orange")
+                                  35 45
+                                  (rectangle 200 250 "solid" "transparent")))
+(define DORCHESTER-MAP (place-image (rectangle 60 70 "solid" "black")
+                                    150 130
+                                    (rectangle 200 250 "solid" "transparent")))
+
+;; draw-neighborhood : Neighborhood -> Image
+;; returns an image of the neighborhood given the neighborhood, a neighborhood is represented by a
+;; circle, but the radius is dependent on the geographical size of the neighborhood
+(define (draw-neighborhood neighborhood)
+  (cond
+    [(string=? neighborhood EAST-BOSTON) EAST-BOSTON-MAP]
+    [(string=? neighborhood WEST-ROXBURY) WEST-ROXBURY-MAP]
+    [(string=? neighborhood HYDE-PARK) HYDE-PARK-MAP]
+    [(string=? neighborhood BRIGHTON) BRIGHTON-MAP]
+    [(string=? neighborhood DORCHESTER) DORCHESTER-MAP]))
+
+;; Test Cases
+(check-expect (draw-neighborhood EAST-BOSTON) EAST-BOSTON-MAP)
+(check-expect (draw-neighborhood WEST-ROXBURY) WEST-ROXBURY-MAP)
+(check-expect (draw-neighborhood HYDE-PARK) HYDE-PARK-MAP)
+(check-expect (draw-neighborhood BRIGHTON) BRIGHTON-MAP)
+(check-expect (draw-neighborhood DORCHESTER) DORCHESTER-MAP)
+
+;;! Part E
+
+;; Now we can draw single neighborhoods, but individually, these images don't tell us much. Design
+;; a function `draw-three-neighborhoods` that takes three neighborhoods and returns an image
+;; of all three in relation to one another. Use color to distinguish the three neighborhoods.
+;; Consider how it would be helpful to use or revise previous functions.
+
+;; [TODO]
+
+;; draw-three-neighborhoods : Neighborhood Neighborhood Neighborhood -> Image
+;; returns a map of the three neighborhoods, with respect to the geographical location and size,
+;; given the three neighborhoods
+(define (draw-three-neighborhoods neighborhood1 neighborhood2 neighborhood3)
+  (overlay (overlay (draw-neighborhood neighborhood3)
+                    (overlay (draw-neighborhood neighborhood2)
+                             (draw-neighborhood neighborhood1)))
+           (rectangle 200 250 "solid" "white")))
+
+;; Test Cases
+(check-expect (draw-three-neighborhoods EAST-BOSTON WEST-ROXBURY BRIGHTON)
+              (overlay (overlay (draw-neighborhood EAST-BOSTON)
+                                (overlay (draw-neighborhood WEST-ROXBURY)
+                                         (draw-neighborhood BRIGHTON)))
+                       (rectangle 200 250 "solid" "white")))
+(check-expect (draw-three-neighborhoods EAST-BOSTON WEST-ROXBURY DORCHESTER)
+              (overlay (overlay (draw-neighborhood EAST-BOSTON)
+                                (overlay (draw-neighborhood WEST-ROXBURY)
+                                         (draw-neighborhood DORCHESTER)))
+                       (rectangle 200 250 "solid" "white")))
+(check-expect (draw-three-neighborhoods EAST-BOSTON HYDE-PARK DORCHESTER)
+              (overlay (overlay (draw-neighborhood EAST-BOSTON)
+                                (overlay (draw-neighborhood HYDE-PARK)
+                                         (draw-neighborhood DORCHESTER)))
+                       (rectangle 200 250 "solid" "white")))
+
+
+(draw-three-neighborhoods EAST-BOSTON HYDE-PARK DORCHESTER)
+
+#|
+
+(overlay (overlay (draw-neighborhood EAST-BOSTON)
+                                (overlay (draw-neighborhood WEST-ROXBURY)
+                                         (overlay (draw-neighborhood HYDE-PARK)
+                                                  (overlay (draw-neighborhood DORCHESTER)
+                                                           (draw-neighborhood BRIGHTON)))))
+                       (rectangle 200 250 "solid" "white"))
+
+|#

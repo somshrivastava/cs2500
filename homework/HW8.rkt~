@@ -1,0 +1,196 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-lambda-reader.ss" "lang")((modname content) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+
+(require 2htdp/image)
+(require 2htdp/universe)
+
+;; Usual Instructions:
+;; 1. Do not create, modify or delete any line that begins with ";;!". These are
+;;    markers that we use to segment your file into parts to facilitate grading.
+;; 2. You must follow the _design recipe_ for every problem. In particular,
+;;    every function you define must have at least three check-expects (and
+;;    more if needed).
+;; 3. You must follow the Style Guide:
+;;    https://pages.github.khoury.northeastern.edu/2500/2024F/style.html
+;; 4. You must submit working code. In DrRacket, ensure you get no errors
+;;    when you click Run. After you submit on Gradescope, you'll get instant
+;;    feedback on whether or not Gradescope can run your code, and your code must
+;;    run on Gradescope to receive credit from the autograder.
+;; 5. On some problems, you can get automated feedback on your in-progress work
+;;    from FeedBot, a system developed by the course staff. When you submit your
+;;    assignment, you will see a link to the FeedBot report along with the autograder
+;;    feedback. Only a certain number of submissions will get this, and submissions
+;;    close together will not receive the feedback.
+
+
+;; In this assignment, you are going to build upon the work you did in HW6 to
+;; build an interactive game that simulates atmospheric CO2 into the future,
+;; based on converting commuters to public transit and planting eelgrass. You
+;; will do this by extending your existing neighborhood data definitions to
+;; store total emissions in each neighborhood, which will then be modified by
+;; converting commuters & planting eelgrass.
+
+;; Eelgrass is part of the Blue Carbon coastal ecosystem that sequester significant
+;; amounts of CO2, and there is current research on how effective it is in Massachusetts.
+;; See, e.g., https://oceanservice.noaa.gov/ecosystems/coastal-blue-carbon/
+;; and https://seagrant.mit.edu/2023/10/19/mapping-blue-carbon-new-report-highlights-coastal-ecosystem-benefits/
+
+;; An estimate from the latter is that, in Massachusetts, 218,222 acres sequester
+;; a collective 7.5 million metric tonnes of carbon, or around 34 tonnes per
+;; acre.
+
+;;! Problem 1
+
+;;! Part A
+
+;; In this problem, you will refine and add to your neighborhood definitions from
+;; previous assignment(s).
+
+;; 1. First, copy your existing BostonCommuters data definition from HW6, along with all
+;;    the definitions it relies upon.
+
+;; 2. After copying your definitions, please fix any issues identified in the
+;;    feedback you got on your HW6 submission.
+
+;; 3. For reference, you should have the following data definitions:
+;;    - Neighborhood: Represents one of 5 neighborhoods in Boston
+;;    - NeighborhoodCommuters: A data definition with three fields:
+;;      - the Neighborhood
+;;      - the number of public transit commuters in that Neighborhood
+;;      - the total number of commuters in that Neighborhood
+;;    - BostonCommuters: Represents a collection (list) of NeighborhoodCommuters.
+
+;; 4. Now for this problem, modify the NeighborhoodCommuters data definition to
+;;    include a field that holds the total carbon emitted, **IN METRIC TONNES**,
+;;    for that Neighborhood. This means the struct should now have four fields.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;;! Part B
+
+;; Define an example of your data definition, that is suitable for showing your graphics, as:
+;; the constant `BC-EX`.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;;! Part C
+
+;; In HW6, you wrote a function, `simulate-emissions`, that calculated the
+;; emissions caused by non-public transit commuters a given number of years into
+;; the future. If it did not assume that everyone who does not use public
+;; transit drives a car, we'd like you to fix that calculation for the sake of
+;; the game -- while this certainly rules out other important commuting
+;; categories (biking, walking), this will more easily allow the game to work.
+
+;; We'd like you to, based on your existing function, design a new function
+;; `add-emissions-one-year` that takes a NeighborhoodCommuters and returns an
+;; updated version, where **one year** of emissions have been added to the new
+;; field of total carbon emitted, based on the existing number of commuters who
+;; drive (which should be all who do not use public transit). You can either use
+;; your existing helper (passing 1 as the number of years) or you can use the
+;; existing calculation when designing this new function.
+
+;; Ensure the units of your emissions are in METRIC TONNES. If you used grams,
+;; divide by 1000000.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;;! Part D
+
+;; In order to draw the game, we need to copy your `draw-boston-emissions`
+;; function from HW6, and all its helpers. If you received feedback in HW6,
+;; (e.g., about how the neighborhoods were positioned) please apply corrections
+;; first.
+;;
+;; However -- in order to be able to be passed to `big-bang`, the only argument
+;; to it must be `BostonCommuters`, so remove the `scale` & `years` arguments.
+;; Instead, pass a fixed scale to the helpers, and render at the given moment.
+;; The other change you should make is in your function to draw a single
+;; neighborhood: since the carbon emissions are now stored in a field, use that
+;; field to determine the color, rather than calling `simulate-emissions`.
+;;
+;; Ensure that your coloring makes it clear how carbon is increasing in
+;; neighborhoods: we would suggest some sort of rainbow, perhaps ending with a
+;; lighter color when total CO2 in a neighborhood reaches 0 (which will correspond
+;; to winning the game!).
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+
+;;! Part E
+
+;; Now that we can draw, we can design a function `tick-boston-emissions`, which
+;; takes a `BostonCommuters` and returns a new one, where one year has
+;; passed. Use the helper you defined in Part C, and consider if there are any
+;; useful list abstractions you can use.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;;! Part F
+
+;; While with tick & draw, we could run the simulation, to make this a game, we
+;; want to add two elements that allow the player to **decrease** CO2.
+;;
+;; First, we want to make it so that if the user presses any key, it causes a
+;; constant number of acres of eelgrass to be planted (the constant is provided;
+;; you can tweak it to alter the gameplay, though the default should work).
+;;
+;; Design a function `key-boston-emissions` that does exactly that. Note that,
+;; based on the intro, one acre eelgrass results in 34 metric tonnes of carbon
+;; removed; we will simplify and assume the effect is split evenly across each
+;; of the 23 neighborhoods, so you should **remove 1.5 metric tonnes of carbon
+;; per acre per neighborhood per keypress**.
+
+(define ACRES-PLANTED-PER-PRESS 500)
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;;! Part G
+
+;; We want there to be a second mechanism for the game: clicking the mouse
+;; should convert a constant number of commuters from driving to using public
+;; transit in each neighborhood (provided below), assuming there are any left.
+;;
+;; Design this function, which should be called `mouse-boston-emissions`, as
+;; well.
+
+(define CONVERTERS-PER-CLICK 300)
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;;! Part H
+
+;; Also, we'd like to be able to win the game! Define a helper function
+;; `win?` that, given a BostonCommuters, returns #true if any of the
+;; neighborhoods have reached 0 carbon.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+;;! Part I
+
+;; The final helper we'd like to define is a function, `draw-win`, to display a "You win!"
+;; message. It should take the game state (BostonCommuters) and return an image
+;; that represents a winning game. We'd suggest text overlaying the existing map.
+
+;;!! IMPORTANT: Write your response BELOW this line:
+
+
+;;! Part J
+
+;; Now design a function `play-game`, that takes an initial `BostonCommuters`
+;; and invokes `big-bang` with the handlers designed in part D, E, F, G, H, I.
+;; When run, it should allow you to try to keep ahead of the carbon by either
+;; planting eelgrass or convincing people to take public transit, and if they
+;; win (get one neighborhood to 0), it should display the winning message (if
+;; you haven't already, consult the documentation for the `stop-when` clause of
+;; big-bang). To make the game playable, slow it down so that each year
+;; (represented by one tick) occurs per second (i.e. `[on-tick
+;; tick-boston-emissions 1]`).
+;;
+;; In order to not have your initial state immediately be a "win" (as no carbon
+;; will be recorded as having been emitted yet), we suggest that rather than
+;; passing the argument as the initial state to `big-bang`, instead pass
+;; `(tick-boston-emissions bc)` -- i.e., begin the game after 1 year.
+
+;;!! IMPORTANT: Write your response BELOW this line:

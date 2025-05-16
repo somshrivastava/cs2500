@@ -1,0 +1,80 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname 9-18-eclipse) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(require 2htdp/image) 
+(require 2htdp/universe)
+
+;; Constants:
+
+(define SKY-WIDTH 300) 
+(define SKY-HEIGHT 200) 
+(define RADIUS 25)
+(define SUN (circle RADIUS "solid" "yellow"))
+(define MOON (circle RADIUS "solid" "gray"))
+(define SKY 
+      (rectangle SKY-WIDTH SKY-HEIGHT "solid" "light blue"))
+(define SUN-ON-SKY (overlay SUN SKY))
+(define DARK-SKY 
+      (rectangle SKY-WIDTH SKY-HEIGHT "solid" "black"))
+(define DIM-SKY 
+      (rectangle SKY-WIDTH SKY-HEIGHT "solid" "blue"))
+
+;; World State Definitions:
+
+; A Position is a (make-posn Number Number)
+; interpretation: represents a point on the Cartesian plane with
+; an x and y position
+
+(define POSN-1 (make-posn 3 4)) 
+(define POSN-2 (make-posn 0 0)) 
+(define POSN-3 (make-posn 89.2 pi))
+(define POSN-4 (make-posn 50 100))
+;(define POSN-4 (make-posn 0 (make-posn 5 7))) not a valid Position
+
+;; Position -> ?
+(define (posn-temp p)
+  (... (posn-x p) ... (posn-y p)))
+
+
+;; eclipse: Position -> Position
+;; launches the eclipse animation
+(define (eclipse p)
+  (big-bang p
+    [to-draw draw-eclipse]
+    [on-tick next-moon]
+    [on-mouse drag-moon]))
+
+;; draw-eclipse: Position -> Image
+;; draws the moon onto the sky with the sun
+(check-expect (draw-eclipse POSN-4)
+              (place-image MOON 50 100 SUN-ON-SKY)) 
+(define (draw-eclipse p)
+  (place-image MOON (posn-x p) (posn-y p) SUN-ON-SKY))
+
+;; next-moon: Position -> Position
+;; produce the next moon at the next tick that is
+;; shifted by 5 and 2
+(check-expect (next-moon POSN-2) (make-posn 5 2))
+(check-expect (next-moon POSN-4) (make-posn 55 102))
+(define (next-moon p)
+  (make-posn (+ 5 (posn-x p)) (+ 2 (posn-y p))))
+
+
+;; drag-moon: Position Integer Integer MouseEvent -> Position
+;; drag the moon to a new position
+(check-expect (drag-moon (make-posn 40 30) 50 90 "drag")
+              (make-posn 50 90))
+(check-expect (drag-moon (make-posn 40 30) 50 90 "button-down")
+              (make-posn 40 30))
+(define (drag-moon p x y me)
+  (if (mouse=? me "drag")
+      (make-posn x y)
+      p))
+
+
+
+
+
+
+
+

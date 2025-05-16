@@ -1,0 +1,19 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-intermediate-reader.ss" "lang")((modname exam3practice) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+(define-struct book (title author year))
+;; A Book is a (make-book String String Number)
+;; - title is the title of the book
+;; - author is the name of the author
+;; - year is the publication year
+;; Interpretation: Represents a book.
+
+(define EX-BOOK1 (make-book "Gatsby" "Fitzgerald" 1925))
+(define EX-BOOK2 (make-book "1984" "Orwell" 1949))
+(define EX-BOOK3 (make-book "Mockingbird" "Lee" 1960))
+
+(check-expect (tba (list EX-BOOK1 EX-BOOK2 EX-BOOK3) "Orwell") (list "1984 (1949)"))
+
+(define (tba lob str)
+  (map (lambda (x) (string-append (book-title x) " (" (book-year x) ") "))
+       (filter (lambda (x) (string=? (book-author x) str)) lob)))

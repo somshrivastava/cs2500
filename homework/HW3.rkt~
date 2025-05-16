@@ -1,0 +1,360 @@
+;; Purpose: Design Recipe practice, now with structured data.
+
+(require 2htdp/image)
+
+;;! Instructions
+;;! 1. Do not create, modify or delete any line that begins with ";;!", such
+;;!    as these lines. These are markers that we use to segment your file into
+;;!    parts to facilitate grading.
+;;! 2. You must follow the _design recipe_ for every problem. In particular,
+;;!    every function you define must have at least three check-expects (and
+;;!    more if needed).
+;;! 3. You must follow the Style Guide:
+;;!    https://pages.github.khoury.northeastern.edu/2500/2024F/style.html
+;;! 4. You must submit working code. In DrRacket, ensure you get on errors
+;;!    when you click Run. After you submit on Gradescope, you'll get instant
+;;!    feedback on whether or Gradescope can run your code, and your code must
+;;!    run on Gradescope to receive credit from the autograder. Any problems
+;;!    reported by the autograder can be corrected and you can resubmit as many
+;;!    times as you want before the deadline.
+
+;;! Problem 1
+
+;; Consider the following data definition and interpretation.
+
+(define-struct time (hours minutes seconds))
+;;! A Time is a (make-time Number Number Number)
+;;! Represents the time of day where:
+;;! – hours is between 0 and 23
+;;! – minutes is between 0 and 59
+;;! – seconds is between 0 and 59
+
+;;! Part A
+;; Complete the two remaining parts of the data design for Time.
+
+;; make-time : Number Number Number -> Time
+;; time? : Any -> Boolean
+;; time-hours : Time -> Number
+;; time-minutes : Time -> Number
+;; time-seconds : Time -> Number
+
+(define TIME-1 (make-time 12 12 59)) ;; 12:12:59
+(define TIME-2 (make-time 5 59 59)) ;; 5:59:59
+(define TIME-3 (make-time 23 59 59)) ;; 23:59:59
+(define TIME-4 (make-time 1 1 1)) ;; 01:01:01
+
+;; time-temp : Time -> ?
+;; represents the template for any function that consumes a Time structure
+(define (time-temp t)
+  (... (time-hours t) ...
+       (time-minutes t) ...
+       (time-seconds t) ...))
+
+;;! Part B
+;; Design a function called tick that adds one second to a Time.
+
+;; tick : Time -> Time
+;; adds one second to a given Time
+(define (tick t)
+  (cond [(< (time-seconds t) 59)
+         (make-time (time-hours t) (time-minutes t) (+ 1 (time-seconds t)))]
+        [(and (= (time-seconds t) 59) (< (time-minutes t) 59))
+         (make-time (time-hours t) (+ (time-minutes t) 1) 0)]
+        [(and (= (time-seconds t) 59) (= (time-minutes t) 59) (< (time-hours t) 23))
+         (make-time (+ 1 (time-hours t)) 0 0)]
+        [else (make-time 0 0 0)]))
+
+;; Test Cases
+(check-expect (tick TIME-1) (make-time 12 13 0))
+(check-expect (tick TIME-2) (make-time 6 0 0))
+(check-expect (tick TIME-3) (make-time 0 0 0))
+(check-expect (tick TIME-4) (make-time 1 1 2))
+
+;;! Part C
+
+;; Design a function called time->image that draws an analog clock face with
+;; three hands. (The hour hand is shortest and the minute and second hand should
+;; be different.)
+;;
+;; See the link below for a refresher on how an analog clock works
+;; https://en.wikipedia.org/wiki/Clock_face
+;; Note: The hour hand does not need to base it's position on the minute hand
+;; for this assignment
+
+;; NOTE: PLEASE USE DARK MODE WHEN CHECKING THE CLOCK, IT DOES NOT WORK IN LIGHT MODE
+
+(define radius 75)
+(define cir (circle radius 10 "light yellow"))
+
+(define clock-background
+  (overlay
+   (place-image (text "12" (ceiling ( / radius 5)) "white") radius (* radius 0.25) cir)
+   (place-image (text "3" (ceiling ( / radius 5)) "white") (* radius 1.75) (* radius 1) cir)  
+   (place-image (text "6" (ceiling ( / radius 5)) "white") (* radius 1) (* radius 1.75) cir)  
+   (place-image (text "9" (ceiling ( / radius 5)) "white") (* radius 0.25) (* radius 1) cir)
+   ))
+
+(define hour-hand
+  (above
+   (rectangle 1 (* 0.6 radius) "outline" "transparent")
+   (rectangle (/ radius 8) (* 0.5 radius)  "solid" "grey")
+   (rectangle  1 (* 0.9 radius)  "outline" "transparent")))
+
+(define minute-hand
+  (above
+   (rectangle 1 (* 0.4 radius) "outline" "transparent")
+   (rectangle (/ radius 25) (* 0.9 radius)   "solid" "white")
+   (rectangle   1 (* 0.7 radius)  "outline" "transparent")))
+
+(define second-hand
+  (above
+   (rectangle 1 (* 0.4 radius)  "outline" "transparent")
+   (rectangle (/ radius 50) (* .9 radius)   "solid" "dark grey")
+   (rectangle 1 (* 0.7 radius) "outline" "transparent"))) 
+
+;; time->image : Time -> Image
+;; returns an image of an analog clock given a time
+(define (time->image t)
+  (overlay (rotate ( - 360 (* (time-seconds t) 6)) second-hand)
+           (rotate ( - 360 (* (time-minutes t) 6)) minute-hand)
+           (rotate ( - 360 (* (modulo (time-hours t) 12) 30)) hour-hand)
+           clock-background))
+
+;; Test Cases
+(check-expect (time->image (make-time 5 25 30)) (overlay (rotate ( - 360 (* 30 6)) second-hand)
+           (rotate ( - 360 (* 25 6)) minute-hand)
+           (rotate ( - 360 (* (modulo 5 12) 30)) hour-hand)
+           clock-background))
+(check-expect (time->image (make-time 12 45 15)) (overlay (rotate ( - 360 (* 15 6)) second-hand)
+           (rotate ( - 360 (* 45 6)) minute-hand)
+           (rotate ( - 360 (* (modulo 12 12) 30)) hour-hand)
+           clock-background))
+(check-expect (time->image (make-time 6 55 45)) (overlay (rotate ( - 360 (* 45 6)) second-hand)
+           (rotate ( - 360 (* 55 6)) minute-hand)
+           (rotate ( - 360 (* (modulo 6 12) 30)) hour-hand)
+           clock-background))
+
+;;! Problem 2
+
+;;! Part A
+
+;; You are designing a registration system for a competition. Design a data definition
+;; called Attendee that represents a person attending the competition. An Attendee
+;; should have a name, gender, email, NUID, and whether they are competing (rather than just
+;; observing).
+
+(define-struct attendee (name gender email nuid competing))
+;; An Attendee is a (make-attendee String String String Number Boolean)
+;; Represents an attendee where:
+;; – name is their first and last name
+;; - gender is their gender
+;; - email is their email
+;; - nuid is their Northeastern ID
+;; - competing is whether they are competing rather than just observing
+
+;; make-attendee : String String String Number Boolean -> Attendee
+;; attendee? : Any -> Boolean
+;; attendee-name : Attendee -> String
+;; attendee-gender : Attendee -> String
+;; attendee-email : Attendee -> String
+;; attendee-nuid : Attendee -> Number
+;; attendee-competing : Attendee -> Boolean
+
+(define ATTENDEE-1 (make-attendee "John Doe" "Male" "doe.john@northeastern.edu" 1234 #true))
+(define ATTENDEE-2 (make-attendee "Neal Doe" "Female" "doe.neal@gmail.com" 5678 #false))
+(define ATTENDEE-3 (make-attendee "Jane Doe" "Male" "doe.jane@northeastern.edu" 7654 #false))
+
+;; attendee-temp : Attendee -> ?
+;; represents the template for any function that consumes an Attendee structure
+(define (attendee-temp a)
+  (... (attendee-name a) ...
+       (attendee-gender a) ...
+       (attendee-email a) ...
+       (attendee-nuid a) ...
+       (attendee-competing a) ...))
+
+;;! Part B
+
+;; Design a function called is-nu-email? that takes an Attendee and returns true if
+;; the email ends with `@northeastern.edu`.
+
+(define EMAIL-ENDING "@northeastern.edu")
+
+;; is-nu-email? : Attendee -> Boolean
+;; returns true if the email of a given attendee ends with "@northeastern.edu"
+(define (is-nu-email? attendee)
+  (if (< (string-length (attendee-email attendee)) (string-length EMAIL-ENDING))
+      #f
+      (string=? "@northeastern.edu"
+                (substring (attendee-email attendee)
+                           (- (string-length (attendee-email attendee))
+                              (string-length EMAIL-ENDING))))))
+
+;; Test Cases
+(check-expect (is-nu-email? ATTENDEE-1) #true)
+(check-expect (is-nu-email? ATTENDEE-2) #false)
+(check-expect (is-nu-email? ATTENDEE-3) #true)
+
+;;! Part C
+
+;; Design a function called mark-competing that takes an Attendee and marks them
+;; as competing. This should only work if `is-nu-email?` returns true,
+;; otherwise, leave the field unchanged.
+
+;; mark-competing : Attendee -> Attendee
+;; marks the attendee as competing if they have an email ending with "@northeastern.edu"
+(define (mark-competing attendee)
+  (if (is-nu-email? attendee)
+      (make-attendee (attendee-name attendee)
+                     (attendee-gender attendee)
+                     (attendee-email attendee)
+                     (attendee-nuid attendee)
+                     #true)
+      attendee))
+
+;; Test Cases
+(check-expect (mark-competing ATTENDEE-1)
+              ATTENDEE-1)
+(check-expect (mark-competing ATTENDEE-2)
+              ATTENDEE-2)
+(check-expect (mark-competing ATTENDEE-3)
+              (make-attendee (attendee-name ATTENDEE-3)
+                             (attendee-gender ATTENDEE-3)
+                             (attendee-email ATTENDEE-3)
+                             (attendee-nuid ATTENDEE-3)
+                             #true))
+
+;;! Part D
+;;
+;; In the next problem, you will have to _print_ a badge -- i.e., turn an
+;; Attendee into an Image. In this problem, we will consider privacy, and
+;; whether there is any information that we put it the Attendee data definition
+;; that is not necessary. A core privacy principle is to collect as little
+;; personal data as possible, focusing on the information directly needed for
+;; the task at hand. In minimizing data collection, we reduce the risk of
+;; privacy violations or data leaks, since if we do not have data, we cannot
+;; accidentally leak it.
+;;
+;; With these data principles in mind, design a new data definition called
+;; Attendee2 that stores less personal data. Compared to the original data
+;; definition, the new data definition should *eliminate* at least one field and
+;; *modify* at least one field to make it more precise.
+;;
+;; You new definiton will need to be used for badge printing, so think carefully
+;; about what you remove.
+
+;; Design a new data definition that eliminates at least one field from the previous
+;; definition and modifies at least one other field.
+
+(define-struct attendee2 (name pronouns email competing))
+;; An Attendee2 is a (make-attendee2 String String String Boolean)
+;; Represents an attendee2 where:
+;; – name is their name
+;; - pronouns is their pronouns
+;; - email is their email
+;; - competing is whether they are competing rather than just observing
+
+;; make-attendee2 : String String String Boolean -> Attendee2
+;; attendee2? : Any -> Boolean
+;; attendee2-name : Attendee2 -> String
+;; attendee2-pronouns : Attendee2 -> String
+;; attendee2-email : Attendee2 -> String
+;; attendee2-competing : Attendee2 -> Boolean
+
+(define ATTENDEE2-1 (make-attendee2 "John" "He/him" "doe.john@northeastern.edu" #true))
+(define ATTENDEE2-2 (make-attendee2 "Neal" "They/them" "doe.neal@gmail.com" #false))
+(define ATTENDEE2-3 (make-attendee2 "Jane" "She/her" "doe.jane@northeastern.edu" #false))
+
+;; attendee2-temp : Attendee2 -> ?
+;; represents the template for any function that consumes an Attendee2 structure
+(define (attendee2-temp a)
+  (... (attendee2-name a) ...
+       (attendee2-pronouns a) ...
+       (attendee2-email a) ...
+       (attendee2-competing a) ...))
+
+;;! Part E
+
+;; In order to answer this question, please watch this short (5min) video:
+;; https://northeastern.hosted.panopto.com/Panopto/Pages/
+Viewer.aspx?id=55828b6f-b114-4320-8a7c-b1f000c2d848
+
+;; Write a short email memo to the other members of the conference team explaining
+;; each change you made and justifying each change with a reason for why
+;; your version is better (one to two sentences per change). At least one
+;; of the justifications should reference a privacy concept from the video
+;; (privacy as ability to control information; intimate privacy; privacy
+;; as a social good; and privacy as minimizing information collection).
+
+#| 
+
+FIRST CHANGE (elimination): got rid of nuid
+JUSTIFICATION: The video discusses preserving privacy by minimizing data collection; in other words,
+only storing data that is NECESSARY. In the case of a printed ID badge, the NUID of a user does not
+NEED to be displayed to everyone, it is an unnecessary pice of information. In addition, it poses
+a security risk as anyone will have access to the private ID if they get their hands on the badge. 
+
+SECOND CHANGE (modification): changed gender to pronouns
+JUSTIFICATION: Diplaying pronouns on a printed ID badge promotes inclusivity, ensuring that
+individuals are addressed properly, without making assumptions based on their appearance. Pronouns
+offer a clearer way of acknowledging identity rather than the gender of the person.
+
+|#
+
+;;! Part F
+;;
+;; Design a function `print-badge` that takes, as input an Attendee2 and returns
+;; an Image. It should display information that you would want to show on a
+;; printed badge for a competition.
+
+;; print-badge : Attendee2 -> Image
+;; returns an image of a printed badge given an attendee
+(define (print-badge attendee)
+  (place-image (text (if (attendee2-competing attendee) "Competing" "Observing") 12 "black")
+             100 80
+             (place-image (text (string-append "Pronouns: " (attendee2-pronouns attendee))
+                                12 "black")
+                          100 60
+                          (place-image (text (attendee2-email attendee) 12 "black")
+                                       100 40
+                                       (place-image (text (attendee2-name attendee)
+                                                          24 "black")
+                                                    100 20 (rectangle 200 100 "solid" "white"))))))
+
+;; Test Cases
+(check-expect (print-badge ATTENDEE2-1)
+              (place-image (text "Competing" 12 "black")
+                           100 80
+                           (place-image (text "Pronouns: He/him" 12 "black")
+                                        100 60
+                                        (place-image (text "doe.john@northeastern.edu" 12 "black")
+                                                     100 40
+                                                     (place-image (text "John" 24 "black")
+                                                                  100 20
+                                                                  (rectangle 200 100
+                                                                             "solid"
+                                                                             "white"))))))
+(check-expect (print-badge ATTENDEE2-2)
+              (place-image (text "Observing" 12 "black")
+                           100 80
+                           (place-image (text "Pronouns: They/them" 12 "black")
+                                        100 60
+                                        (place-image (text "doe.neal@gmail.com" 12 "black")
+                                                     100 40
+                                                     (place-image (text "Neal" 24 "black")
+                                                                  100 20
+                                                                  (rectangle 200 100
+                                                                             "solid"
+                                                                             "white"))))))
+(check-expect (print-badge ATTENDEE2-3)
+              (place-image (text "Observing" 12 "black")
+                           100 80
+                           (place-image (text "Pronouns: She/her" 12 "black")
+                                        100 60
+                                        (place-image (text "doe.jane@northeastern.edu" 12 "black")
+                                                     100 40
+                                                     (place-image (text "Jane" 24 "black")
+                                                                  100 20
+                                                                  (rectangle 200 100
+                                                                             "solid"
+                                                                             "white"))))))

@@ -1,0 +1,58 @@
+;; The first three lines of this file were inserted by DrRacket. They record metadata
+;; about the language level of this file in a form that our tools can easily process.
+#reader(lib "htdp-beginner-reader.ss" "lang")((modname content) (read-case-sensitive #t) (teachpacks ()) (htdp-settings #(#t constructor repeating-decimal #f #t none #f () #f)))
+
+;;! Instructions:
+;;! 1. Read the contents of this file, and carry out the tasks within
+;;!    below.
+;;! 2. Do not create, modify or delete any line that begins with ";;!!", such
+;;!    as these lines. These are markers that we use to segment your file into
+;;!    parts to facilitate grading.
+
+(require 2htdp/image)
+(require 2htdp/universe)
+
+;;! Problem 1
+;;
+;; Design a data definition for a WritingImplement that is either a pen, pencil, or quill.
+;;
+;; Estimated Portion of Lab: 15%
+
+
+;;! Problem 2
+;;
+;; Design a function maybe-duplicate-string that takes in a String and a Boolean.
+;; The function should return a String with two copies of the original String when the input Boolean is #true.
+;; If the input Boolean is #false, the function should return the original String unchanged.
+;;
+;; Estimated Portion of Lab: 25%
+
+
+;;! Problem 3
+;;
+;; Design a data definition for an Address that includes a street number, street & city.
+;;
+;; Estimated Portion of Lab: 35%
+
+
+;;! Problem 4
+;;
+;; Consider the following data definition for Weight:
+;;
+(define-struct weight [pounds ounces])
+;; A Weight is a (make-weight Number Number[0-15])
+;; Interpretation: a weight in imperial measure, where:
+;; - pounds is the number of pounds
+;; - ounces is the number of ounces, which should never be over 15 since 16 ounces are 1 pound
+(define WEIGHT0 (make-weight 0 0))
+(define WEIGHT1 (make-weight 0 15))
+(define WEIGHT2 (make-weight 12 4))
+
+(define (weight-temp w)
+  (... (weight-pounds w) ... (weight-ounces w) ...))
+
+;; Design a function total-ounces that takes as input a Weight and returns the
+;; total number of ounces it represents (as just a number).
+;;
+;; Estimated Portion of Lab: 25%
+
